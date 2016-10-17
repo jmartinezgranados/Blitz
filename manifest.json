@@ -1,110 +1,123 @@
 {
-	 "manifestVersion": 1,
-	 "id": "blitz-allpulls-extension",
-	 "version": "0.8.5",
-	 "name": "Blitz Active Pull Requests",
-	 "description": "An extension that shows all active pull requests across all of your project's repositories.",
-	 "publisher": "sierpinski",
-	 "icons": {
-        "default": "images/blitzallpulls.png"
-		},
-	"categories": [
-        "Code"
-    ],
-	"tags": [
-        "pull request",
-		"git"
-    ],
-	"galleryFlags": [
-        "Public"
-    ],
-	"content": {
-        "details": {
-            "path": "overview.md"
-        },
-        "license": {
-            "path": "license-terms.md"
-        }
+  "manifestVersion": 1,
+  "id": "blitz-allpulls-extension",
+  "version": "0.9.3",
+  "name": "Blitz Active Pull Requests",
+  "description": "Shows all active pull requests across all of your project's repositories.",
+  "publisher": "sierpinski",
+  "icons": {
+    "default": "images/blitzallpulls.png"
+  },
+  "categories": [
+    "Code"
+  ],
+  "tags": [
+    "pull request",
+    "git"
+  ],
+  "galleryFlags": [
+    "Public"
+  ],
+  "content": {
+    "details": {
+      "path": "overview.md"
     },
-	"screenshots": [
-		{
-            "path": "images/ScreenCaptureExtv03.png"
-        },
-        {
-            "path": "images/ScreenCapNav.png"
-        },
-		{
-            "path": "images/ScreenCapWidget.png"
-        }
-    ],
-	"links": {
-        "home": {
-            "uri": "https://github.com/sierpinski/Blitz"
-        }
+    "license": {
+      "path": "license-terms.md"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "images/ScreenCaptureExtv03.png"
     },
-    "branding": {
-        "color": "rgb(90, 86, 206)",
-        "theme": "dark"
+    {
+      "path": "images/ScreenCapNav.png"
     },
-	 "targets": [
-			 {
-				 "id": "Microsoft.VisualStudio.Services"
-			 }
-		 ],
-	 "contributions": [
-			 {
-				 "id": "BlitzActivePulls",
-				 "type": "ms.vss-web.hub",
-				 "description": "Shows all active pull requests across all of your project's repositories.",
-				 "targets": [
-					 "ms.vss-code-web.code-hub-group"
-				 ],
-				 "properties": {
-					 "name": "Active Pull Requests",
-					 "order": 99,
-					 "uri": "blitzallpulls.html"
-				 }
-			 },
-			 {
-                "id": "BlitzActivePullsWidget",
-                "type": "ms.vss-dashboards-web.widget",
-                "targets": [
-                    "ms.vss-dashboards-web.widget-catalog"
-                ],
-                "properties": {
-                    "name": "Blitz Active Pull Requests Count",
-                    "description": "Shows a count of all active pull requests across all of your project's repositories.",
-                    "catalogIconUrl:": "images/CatalogIcon.png",
-                    "previewImageUrl": "images/preview.png",                            
-                    "uri": "blitzallpullswidget.html",
-                    "supportedSizes": [
-                         {
-                                "rowSpan": 1,
-                                "columnSpan": 1
-                            }
-                        ],
-                    "supportedScopes": ["project_team"]
-                }
-            }
-		 ],
-     "scopes": [
-			 "vso.code"
-		 ],
-	"files": [
-         {
-             "path": "blitzallpulls.html", "addressable": true
-         },
-		 {
-             "path": "blitzallpullswidget.html", "addressable": true
-         },
-         {
-             "path": "sdk/scripts", "addressable": true
-         },
-         {
-             "path": "images/CatalogIcon.png", "addressable": true
-         },
-         {
-             "path": "images/preview.png", "addressable": true
-         }
-	]
+    {
+      "path": "images/ScreenCapWidget.png"
+    }
+  ],
+  "links": {
+    "home": {
+      "uri": "https://github.com/sierpinski/Blitz"
+    }
+  },
+  "branding": {
+    "color": "rgb(90, 86, 206)",
+    "theme": "dark"
+  },
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "contributions": [
+    {
+      "id": "BlitzActivePulls",
+      "type": "ms.vss-web.hub",
+      "description": "Shows all active pull requests across all of your project's repositories.",
+      "targets": [
+        "ms.vss-code-web.code-hub-group"
+      ],
+      "properties": {
+        "name": "Active Pull Requests",
+        "order": 99,
+        "uri": "blitzallpulls.html"
+      }
+    },
+    {
+      "id": "BlitzActivePullsWidget",
+      "type": "ms.vss-dashboards-web.widget",
+      "targets": [
+        "ms.vss-dashboards-web.widget-catalog"
+      ],
+      "properties": {
+        "name": "Blitz Active Pull Requests Count",
+        "description": "Count of all active pull requests across all of your project's repositories.",
+        "catalogIconUrl:": "images/CatalogIcon.png",
+        "previewImageUrl": "images/preview.png",
+        "uri": "blitzallpullswidget.html",
+        "supportedSizes": [
+          {
+            "rowSpan": 1,
+            "columnSpan": 1
+          }
+        ],
+        "supportedScopes": [ "project_team" ]
+      }
+    }
+  ],
+  "scopes": [
+    "vso.code"
+  ],
+  "files": [
+    {
+      "path": "blitzallpulls.html",
+      "addressable": true
+    },
+    {
+      "path": "blitzallpullswidget.html",
+      "addressable": true
+    },
+    {
+      "path": "scripts",
+      "addressable": true
+    },
+    {
+      "path": "styles",
+      "addressable": true
+    },
+    {
+      "path": "sdk/scripts",
+      "addressable": true
+    },
+    {
+      "path": "images/CatalogIcon.png",
+      "addressable": true
+    },
+    {
+      "path": "images/preview.png",
+      "addressable": true
+    }
+  ]
 }
