@@ -19,7 +19,7 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 		var projCurr = currentContext.project.name;
 		var currUserId = currentContext.user.id;
 
-		$("#ProjectNameSpan").html(projCurr);
+		$("#ProjectNameSpan").text(projCurr);
 
 		gitClient.getPullRequestsByProject(projCurr).then(function (pullRequests) {
 			$("#PullRequestCountSpan").html(pullRequests.length);
@@ -31,9 +31,9 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				$("#" + id + "").append(creatorElem);
 				var repoName;
 				gitClient.getRepository(pullRequest.repository.id).then(function (repo) {
-					$("#" + id + "").find("[data-repid='" + pullRequest.repository.id + "']").before("<td>" + repo.name + "</td>");
+					$("#" + id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(repo.name));
 				});
-				$("#" + id + "").append("<td data-repid=\"" + pullRequest.repository.id + "\">" + pullRequest.title + "</td>");
+				$("#" + id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
 				var dStr = pullRequest.creationDate.toString();
 				var cDate = dStr.substring(0, 24);
 				$("#" + id + "").append("<td>" + cDate + "</td>");

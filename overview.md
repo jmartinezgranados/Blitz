@@ -17,6 +17,8 @@ Here is an example list of pull requests:
 ![Screenshot of Active Pull Requests](https://sierpinski.gallery.vsassets.io/_apis/public/gallery/publisher/sierpinski/extension/blitz-allpulls-extension/0.9.3/assetbyname/Microsoft.VisualStudio.Services.Screenshots.1 "Screenshot/Active Pull Requests")
 
 ##Features In Latest Update(s)
+##Hotfix to remove XSS vulnerability. 0.9.4
+A potential XSS vulnerabilty is removed.
 New features:
 * Streamlined code; fixed bug in links on-premises.
 * Widget!!! Check out the widget screenshot above. You can add it to your dashboard!
