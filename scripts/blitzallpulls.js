@@ -25,7 +25,8 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 			$("#PullRequestCountSpan").html(pullRequests.length);
 			jQuery.each(pullRequests, function (index, pullRequest) {
 				var id = pullRequest.pullRequestId;
-				$("#pullRequestTableBody").append("<tr class=\"noMatchUser\" id=\"" + id + "\"></tr>");
+				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + id + "\"></tr>");
+				if (currUserId === pullRequest.createdBy.id) $("#" + id + "").removeClass("notUserCreator");
 				$("#" + id + "").append("<td>" + id + "</td>");
 				var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
 				$("#" + id + "").append(creatorElem);
@@ -46,7 +47,7 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				var holder = $("<td></td>");
 				jQuery.each(pullRequest.reviewers, function (index, reviewer) {
 					var reviewerId = reviewer.id;
-					if (currUserId === reviewerId) $("#" + id + "").removeClass("noMatchUser");
+					if (currUserId === reviewerId) $("#" + id + "").removeClass("notUserReviewer");
 					var vote = "";
 					var infoBubble = "No response.";
 					if (reviewer.vote === -5) {
@@ -81,7 +82,12 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 	});
 $(document).ready(function () {
 	$('#limitReviewerMe').change(function () {
-		$('.noMatchUser').toggle(!(this.checked));
+		$('.notUserReviewer').toggle(!(this.checked));
+		if ($('#limitCreatorMe').is(':checked')) $('.notUserCreator').toggle(false);
+	});
+	$('#limitCreatorMe').change(function () {
+		$('.notUserCreator').toggle(!(this.checked));
+		if ($('#limitReviewerMe').is(':checked')) $('.notUserReviewer').toggle(false);
 	});
 	$(document).on("click","#pullRequestTableBody tr", function() {
 		window.open($(this).data("linkToPr"),"_parent");

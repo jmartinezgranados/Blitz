@@ -41,7 +41,7 @@ h5, h3 {
 	border-color: #FF8C0C;
 }
 
-#limitReviewerMe {
+#limitReviewerMe, #limitCreatorMe {
 	position: relative !important;
 	padding-left: 0px !important;
 	margin-left: 0px !important;
