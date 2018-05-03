@@ -26,8 +26,10 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 			jQuery.each(pullRequests, function (index, pullRequest) {
 				var id = pullRequest.pullRequestId;
 				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + id + "\"></tr>");
+				// Add PR link to data element of row, so clicking the row takes you to the PR.
+				var pullRequestLink = currentContext.host.uri + projCurr + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id;
 				if (currUserId === pullRequest.createdBy.id) $("#" + id + "").removeClass("notUserCreator");
-				$("#" + id + "").append("<td>" + id + "</td>");
+				$("#" + id + "").append("<td><a href=" + pullRequestLink + " target=_parent>" + id + "</a></td>");
 				var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
 				$("#" + id + "").append(creatorElem);
 				var repoName;
@@ -70,8 +72,6 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				});
 				$("#" + id + "").append(holder);
 				
-				// Add PR link to data element of row, so clicking the row takes you to the PR.
-				var pullRequestLink = currentContext.host.uri + projCurr + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id;
 				$("#" + id + "").data("linkToPr", pullRequestLink);
 			});
 		}).catch(console.log.bind(console));

@@ -46,3 +46,7 @@ h5, h3 {
 	padding-left: 0px !important;
 	margin-left: 0px !important;
 }
+
+#pullRequestTableContainer {
+	margin: 5px;
+}
