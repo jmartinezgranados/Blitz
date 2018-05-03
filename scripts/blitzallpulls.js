@@ -68,12 +68,10 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 					holder.append($("<img data-toggle=\"tooltip\" title=\"" + infoBubble + "\" class=\"img-responsive" + vote + "\" width=\"27px\" height=\"27px\" src=\"" + reviewer.imageUrl + "\" alt=\"" + reviewer.displayName + "\"></img>"));
 				});
 				$("#" + id + "").append(holder);
-				var theRepo = currentContext.host.uri + projCurr + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id; // <- Will this fix on-prem.?
-				//var thePullReq = pullRequest.url;
-				//var modified = thePullReq.replace("_apis\/git\/repositories", projCurr + "\/_git");
-				//var modified2 = modified.replace("pullRequests", "pullRequest");
-				var pullWorkElem = $("<td></td>").append($("<a target=\"_parent\" class=\"btn btn-default\" role=\"button\" id=\"refLink\" href=\"" + theRepo + "\"><span class=\"glyphicon glyphicon-arrow-right\" aria-hidden=\"true\"></span></a>"));
-				$("#" + id + "").append(pullWorkElem);
+				
+				// Add PR link to data element of row, so clicking the row takes you to the PR.
+				var pullRequestLink = currentContext.host.uri + projCurr + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id;
+				$("#" + id + "").data("linkToPr", pullRequestLink);
 			});
 		}).catch(console.log.bind(console));
 
@@ -84,5 +82,8 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 $(document).ready(function () {
 	$('#limitReviewerMe').change(function () {
 		$('.noMatchUser').toggle(!(this.checked));
+	});
+	$(document).on("click","#pullRequestTableBody tr", function() {
+		window.open($(this).data("linkToPr"),"_parent");
 	});
 });
