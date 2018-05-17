@@ -15,9 +15,10 @@
 </head>
 <body>
     <div class="row">
-        <h5 class="col-md-3" align="center">Pull Request Count: <span id="PullRequestCountSpan"></span></h5><h3 class="col-md-6" align="center">Active Pull Requests</h3><h5 class="col-md-3" align="center">Project: <span id="ProjectNameSpan"></span></h5>
+        <button id="toggleOptions" type="button" class="col-md-1 btn btn-info">Options</button>
+        <h5 class="col-md-2" align="center">Pull Request Count: <span id="PullRequestCountSpan"></span></h5><h3 class="col-md-6" align="center">Active Pull Requests</h3><h5 class="col-md-3" align="center">Project: <span id="ProjectNameSpan"></span></h5>
     </div>
-    <div class="row" name="filters">
+    <div class="row" id="filters" style="display:none;">
         <form role="form">
             <div class="checkbox">
                 <label><input type="checkbox" value="" id="limitReviewerMe"> Only Pull Requests I am a Reviewer.</label>

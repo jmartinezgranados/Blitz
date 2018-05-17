@@ -92,4 +92,7 @@ $(document).ready(function () {
 	$(document).on("click","#pullRequestTableBody tr", function() {
 		window.open($(this).data("linkToPr"),"_parent");
 	});
+	$("#toggleOptions").click(function(){
+		$("#filters").toggle();
+	});
 });
