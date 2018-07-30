@@ -1,3 +1,7 @@
+body {
+	height: 100%;
+}
+
 .id-holder {
 	clear: both;
 	padding: 2px;
@@ -12,9 +16,15 @@ h5, h3 {
 	margin: 0;
 }
 
-#pullRequestTableContainer {
-	height: 100%;
+#filters[style*="display: none"] ~ #pullRequestTableContainer, #filters[style*="display:none"] ~ #pullRequestTableContainer  {
+	height: calc(100% - 40px);
 	overflow: scroll;
+}
+
+#pullRequestTableContainer {
+	height: calc(100% - 113px);
+	overflow: scroll;
+	margin: 5px;
 }
 
 .approved {
@@ -45,8 +55,4 @@ h5, h3 {
 	position: relative !important;
 	padding-left: 0px !important;
 	margin-left: 0px !important;
-}
-
-#pullRequestTableContainer {
-	margin: 5px;
 }

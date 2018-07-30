@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "blitz-allpulls-extension",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "name": "Blitz Active Pull Requests",
   "description": "Shows all active pull requests across all of your project's repositories.",
   "publisher": "sierpinski",
