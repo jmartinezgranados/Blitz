@@ -12,12 +12,6 @@ The extension will be here:
 Comes with a widget that will show all active pull requests in your project across all repositories. Here's how it looks:
 ![Widget Showing Active Pull Requests](https://sierpinski.gallery.vsassets.io/_apis/public/gallery/publisher/sierpinski/extension/blitz-allpulls-extension/0.9.3/assetbyname/Microsoft.VisualStudio.Services.Screenshots.3 "Active Pull Requests Widget")
 
-## Update 0.9.9
-Added ability to filter to only pull requests created by user.
-
-## Update 0.9.6
-Made each row clickable, taking you to the pull request.
-
 ## Source Code and Issue Reporting
 I've added the source to [my GitHub repository](https://github.com/sierpinski/Blitz). Please open issues with the extension there so I can track them more easily.
 
