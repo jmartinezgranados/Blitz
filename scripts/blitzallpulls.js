@@ -27,7 +27,7 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				var id = pullRequest.pullRequestId;
 				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + id + "\"></tr>");
 				// Add PR link to data element of row, so clicking the row takes you to the PR.
-				var pullRequestLink = currentContext.host.uri + projCurr + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id;
+				var pullRequestLink = currentContext.host.uri + encodeURIComponent(projCurr) + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id;
 				if (currUserId === pullRequest.createdBy.id) $("#" + id + "").removeClass("notUserCreator");
 				$("#" + id + "").append("<td><a href=" + pullRequestLink + " target=_parent>" + id + "</a></td>");
 				var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
