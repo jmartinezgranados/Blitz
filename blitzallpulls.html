@@ -11,11 +11,11 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="sdk/scripts/VSS.SDK.min.js"></script>
     <!-- AppInsights -->
-    <script src="scripts/appinsightsblitz.js"></script>
+    <!--script src="scripts/appinsightsblitz.js"></script-->
 </head>
 <body>
     <div class="row">
-        <button id="toggleOptions" type="button" class="col-md-1 btn btn-info">Options</button>
+        <button id="toggleOptions" type="button" class="col-md-1 btn btn-dark">Options</button>
         <h5 class="col-md-2" align="center">Pull Request Count: <span id="PullRequestCountSpan"></span></h5><h3 class="col-md-6" align="center">Active Pull Requests</h3><h5 class="col-md-3" align="center">Project: <span id="ProjectNameSpan"></span></h5>
     </div>
     <div class="row" id="filters" style="display:none;">
@@ -27,6 +27,13 @@
                 <label><input type="checkbox" value="" id="limitCreatorMe"> Only Pull Requests I am the Creator.</label>
             </div>
         </form>
+		<div class="form-group fitFilters">
+		  <label for="sel1">Theme:</label>
+		  <select class="form-control" id="selTheme">
+			<option>Classic</option>
+			<option>Small Fade</option>
+		  </select>
+		</div>
     </div>
     <div class="table-responsive" id="pullRequestTableContainer">
         <table class="table table-hover table-striped table-condensed" id="pullRequestTable">

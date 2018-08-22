@@ -1,3 +1,6 @@
+// The viewmodel
+var pullRequestArray = [];
+
 // Sets up the initial handshake with the host frame
 VSS.init({
 	// Our extension will explicitly notify the host when we're done loading
@@ -7,79 +10,121 @@ VSS.init({
 	usePlatformScripts: true,
 	usePlatformStyles: true
 });
-// Load Team Services controls
-// Load VSTS controls and REST client
+
+// Load VSTS context and data.
 VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
-	"VSS/Service", "TFS/VersionControl/GitRestClient"],
-	function (Controls, Grids, Dialogs, VSS_Service, Git_Client) {
-
+	"VSS/Service", "TFS/VersionControl/GitRestClient", "TFS/Build/RestClient"],
+	function (Controls, Grids, Dialogs, VSS_Service, Git_Client, Build_Client) {
+		// The Git and Buile clients for eventually populating code and build details.
 		var gitClient = VSS_Service.getCollectionClient(Git_Client.GitHttpClient);
-
+		var buildClient = Build_Client.getClient();
+		
+		// Get Context from VSTS
 		var currentContext = VSS.getWebContext();
 		var projCurr = currentContext.project.name;
 		var currUserId = currentContext.user.id;
 
+		// Display Project Name
 		$("#ProjectNameSpan").text(projCurr);
 
+		// Get Pull Reuqets Data and populate pull request array.
 		gitClient.getPullRequestsByProject(projCurr).then(function (pullRequests) {
+			// Populate Pull Request Count
 			$("#PullRequestCountSpan").html(pullRequests.length);
 			jQuery.each(pullRequests, function (index, pullRequest) {
-				var id = pullRequest.pullRequestId;
-				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + id + "\"></tr>");
-				// Add PR link to data element of row, so clicking the row takes you to the PR.
-				var pullRequestLink = currentContext.host.uri + encodeURIComponent(projCurr) + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+id;
-				if (currUserId === pullRequest.createdBy.id) $("#" + id + "").removeClass("notUserCreator");
-				$("#" + id + "").append("<td><a href=" + pullRequestLink + " target=_parent>" + id + "</a></td>");
-				var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
-				$("#" + id + "").append(creatorElem);
-				var repoName;
-				gitClient.getRepository(pullRequest.repository.id).then(function (repo) {
-					$("#" + id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(repo.name));
-				});
-				$("#" + id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
-				var dStr = pullRequest.creationDate.toString();
-				var cDate = dStr.substring(0, 24);
-				$("#" + id + "").append("<td>" + cDate + "</td>");
-				var testMerge = pullRequest.mergeStatus;
-				var resultMerge = testMerge === 3 ? "Succeeded" : "Failed";
-				var resultMerge2 = testMerge === 3 ? "success" : "danger";
-				var mergeElem = $("<td>" + resultMerge + "</td>").css("color", testMerge === 3 ? "green" : "red");
-				$("#" + id + "").append(mergeElem);
-				$("#" + id + "").addClass(resultMerge2);
-				var holder = $("<td></td>");
-				jQuery.each(pullRequest.reviewers, function (index, reviewer) {
-					var reviewerId = reviewer.id;
-					if (currUserId === reviewerId) $("#" + id + "").removeClass("notUserReviewer");
-					var vote = "";
-					var infoBubble = "No response.";
-					if (reviewer.vote === -5) {
-						vote = " waitingauthor";
-						infoBubble = reviewer.displayName + " recommends waiting for the author of the code.";
-					}
-					if (reviewer.vote === 5) {
-						vote = " approvedwithsuggestions";
-						infoBubble = reviewer.displayName + " approved the pull request with suggestions.";
-					}
-					if (reviewer.vote === 10) {
-						vote = " approved";
-						infoBubble = reviewer.displayName + " approved the pull request.";
-					}
-					if (reviewer.vote === -10) {
-						vote = " rejected";
-						infoBubble = reviewer.displayName + " rejected the pull request.";
-					}
-					holder.append($("<img data-toggle=\"tooltip\" title=\"" + infoBubble + "\" class=\"img-responsive" + vote + "\" width=\"27px\" height=\"27px\" src=\"" + reviewer.imageUrl + "\" alt=\"" + reviewer.displayName + "\"></img>"));
-				});
-				$("#" + id + "").append(holder);
+				var idData = pullRequest.pullRequestId;
+				var createdByData = pullRequest.createdBy;
+				var pullRequestLinkData = currentContext.host.uri + encodeURIComponent(projCurr) + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+pullRequest.pullRequestId;
+				var cDateData = pullRequest.creationDate.toString();
+				var titleData = pullRequest.title;
+				var resultMergeData = pullRequest.mergeStatus === 3 ? "Succeeded" : "Conflicts";
+				var resultMerge2Data = pullRequest.mergeStatus === 3 ? "success" : "danger";
+				var repositoryData = pullRequest.repository;
 				
-				$("#" + id + "").data("linkToPr", pullRequestLink);
+				// Create pull Request Object
+				var pullRequestData = {
+					id: idData,
+					createdBy: createdByData,
+					pullRequestLink: pullRequestLinkData,
+					title: titleData,
+					cDate: cDateData,
+					resultMerge: resultMergeData,
+					resultMerge2: resultMerge2Data,
+					userId: currUserId,
+					repository: repositoryData
+				};
+				
+				// Get and populate reviewers.
+				var reviewerArray = [];
+				jQuery.each(pullRequest.reviewers, function (index, reviewer) {
+					reviewerArray.push(reviewer);
+				});
+				pullRequestData.reviewers = reviewerArray;
+				
+				
+				// Push pullRequest to array.
+				pullRequestArray.push(pullRequestData);
 			});
-		}).catch(console.log.bind(console));
+		}).finally(function() {generatePullRequestTable(pullRequestArray);}).catch(console.log.bind(console));
 
-		$('[data-toggle="tooltip"]').tooltip();
 
 		VSS.notifyLoadSucceeded();
 	});
+
+function generatePullRequestTable(pullRequestArray){
+	jQuery.each(pullRequestArray, function (index, pullRequest) {
+		$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + pullRequest.id + "\"></tr>");
+			
+		if (pullRequest.userId === pullRequest.createdBy.id) $("#" + pullRequest.id + "").removeClass("notUserCreator");
+		
+		$("#" + pullRequest.id + "").append("<td style=\"color:black !important;\"><a href=" + pullRequest.pullRequestLink + " target=_parent>" + pullRequest.id + "</a></td>");
+		
+		var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
+		$("#" + pullRequest.id + "").append(creatorElem);
+		
+		$("#" + pullRequest.id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
+		$("#" + pullRequest.id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(pullRequest.repository.name));
+		
+		$("#" + pullRequest.id + "").append("<td>" + pullRequest.cDate + "</td>");
+	
+		var mergeElem = $("<td>" + pullRequest.resultMerge + "</td>").css("color", pullRequest.resultMerge === "Succeeded" ? "green" : "red");
+		$("#" + pullRequest.id + "").append(mergeElem);
+
+		var holder = $("<td></td>");
+		// Add Reviewers
+		jQuery.each(pullRequest.reviewers, function (index, reviewer) {
+			var vote = "";
+			var infoBubble = "No response.";
+			if (reviewer.vote === -5) {
+				vote = " waitingauthor";
+				infoBubble = reviewer.displayName + " recommends waiting for the author of the code.";
+			}
+			if (reviewer.vote === 5) {
+				vote = " approvedwithsuggestions";
+				infoBubble = reviewer.displayName + " approved the pull request with suggestions.";
+			}
+			if (reviewer.vote === 10) {
+				vote = " approved";
+				infoBubble = reviewer.displayName + " approved the pull request.";
+			}
+			if (reviewer.vote === -10) {
+				vote = " rejected";
+				infoBubble = reviewer.displayName + " rejected the pull request.";
+			}
+			if (pullRequest.userId === reviewer.id) $("#" + pullRequest.id + "").removeClass("notUserReviewer");
+			holder.append($("<img data-toggle=\"tooltip\" title=\"" + infoBubble + "\" class=\"img-responsive" + vote + "\" width=\"27px\" height=\"27px\" src=\"" + reviewer.imageUrl + "\" alt=\"" + reviewer.displayName + "\"></img>"));
+		});
+		$("#" + pullRequest.id + "").append(holder);
+		
+		
+		$("#" + pullRequest.id + "").addClass(pullRequest.resultMerge2);
+		
+		$("#" + pullRequest.id + "").data("linkToPr", pullRequest.pullRequestLink);
+		
+		$('[data-toggle="tooltip"]').tooltip();
+	});
+};	
+
 $(document).ready(function () {
 	$('#limitReviewerMe').change(function () {
 		$('.notUserReviewer').toggle(!(this.checked));
@@ -94,5 +139,23 @@ $(document).ready(function () {
 	});
 	$("#toggleOptions").click(function(){
 		$("#filters").toggle();
+	});
+	$("#selTheme").change(function() {
+		var selectedValue = $("#selTheme").val();
+		if (selectedValue === "Classic") {
+			var succeeded = $("tr.successful");
+			succeeded.removeClass("successful");
+			succeeded.addClass("success");
+			var unsucceessful = $("tr.unsuccessful");
+			unsucceessful.removeClass("unsuccessful");
+			unsucceessful.addClass("danger");
+		} else if (selectedValue == "Small Fade") {
+			var succeeded = $("tr.success");
+			succeeded.removeClass("success");
+			succeeded.addClass("successful");
+			var unsucceessful = $("tr.danger");
+			unsucceessful.removeClass("danger");
+			unsucceessful.addClass("unsuccessful");
+		}
 	});
 });

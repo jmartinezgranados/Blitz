@@ -51,8 +51,23 @@ h5, h3 {
 	border-color: #FF8C0C;
 }
 
-#limitReviewerMe, #limitCreatorMe {
+#limitReviewerMe, #limitCreatorMe{
 	position: relative !important;
 	padding-left: 0px !important;
 	margin-left: 0px !important;
+}
+
+.fitFilters {
+	margin-left: 20px !important;
+	width: 150px !important;
+}
+
+.successful {
+    background-color: green; /* For browsers that do not support gradients */
+    background-image: linear-gradient(to right, green , white 3%); /* Standard syntax (must be last) */
+}
+
+.unsuccessful {
+    background-color: red; /* For browsers that do not support gradients */
+    background-image: linear-gradient(to right, red , white 3%, white 97%, red); /* Standard syntax (must be last) */
 }
