@@ -13,6 +13,7 @@ The extension will be here:
 
 ## Options
 Filters allow filtering by PRs for which you are a reviewer and PRs created by you.
+
 Themes allow you to change the look and feel of the extension.
 
 ## Widget
