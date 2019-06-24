@@ -71,3 +71,7 @@ h5, h3 {
     background-color: red; /* For browsers that do not support gradients */
     background-image: linear-gradient(to right, red , white 3%, white 97%, red); /* Standard syntax (must be last) */
 }
+
+.hidden {
+	display: none;
+}

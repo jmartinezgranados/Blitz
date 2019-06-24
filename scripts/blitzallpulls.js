@@ -1,5 +1,27 @@
 // The viewmodel
 var pullRequestArray = [];
+var repositories = [];
+
+var updateByRepository = function(option, checked) {
+	var reposToShow = $("#repositories-select").val();
+	if(reposToShow && reposToShow.length > 0) {
+		$('#pullRequestTableBody td:nth-child(3)').each(function(i, el) {
+			if(!reposToShow.includes($(el).text())) {
+			  $(el).closest("tr").addClass("hidden");
+			} else {
+			  $(el).closest("tr").removeClass("hidden");
+			}
+		});
+		$("#PullRequestCountSpan").html($("#pullRequestTableBody tr").not(".hidden").length);
+	}
+	else {
+		$('#pullRequestTableBody td:nth-child(3)').each(function(i, el) {
+			$(el).closest("tr").addClass("hidden");
+		});
+		$("#PullRequestCountSpan").html(0);
+	}
+	localStorage.setItem('selectedRepositories', reposToShow);
+};
 
 // Sets up the initial handshake with the host frame
 VSS.init({
@@ -18,7 +40,7 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 		// The Git and Buile clients for eventually populating code and build details.
 		var gitClient = VSS_Service.getCollectionClient(Git_Client.GitHttpClient);
 		var buildClient = Build_Client.getClient();
-		
+
 		// Get Context from VSTS
 		var currentContext = VSS.getWebContext();
 		var projCurr = currentContext.project.name;
@@ -40,7 +62,7 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				var resultMergeData = pullRequest.mergeStatus === 3 ? "Succeeded" : "Conflicts";
 				var resultMerge2Data = pullRequest.mergeStatus === 3 ? "success" : "danger";
 				var repositoryData = pullRequest.repository;
-				
+
 				// Create pull Request Object
 				var pullRequestData = {
 					id: idData,
@@ -53,15 +75,15 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 					userId: currUserId,
 					repository: repositoryData
 				};
-				
+
 				// Get and populate reviewers.
 				var reviewerArray = [];
 				jQuery.each(pullRequest.reviewers, function (index, reviewer) {
 					reviewerArray.push(reviewer);
 				});
 				pullRequestData.reviewers = reviewerArray;
-				
-				
+
+
 				// Push pullRequest to array.
 				pullRequestArray.push(pullRequestData);
 			});
@@ -74,19 +96,19 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 function generatePullRequestTable(pullRequestArray){
 	jQuery.each(pullRequestArray, function (index, pullRequest) {
 		$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + pullRequest.id + "\"></tr>");
-			
+
 		if (pullRequest.userId === pullRequest.createdBy.id) $("#" + pullRequest.id + "").removeClass("notUserCreator");
-		
+
 		$("#" + pullRequest.id + "").append("<td style=\"color:black !important;\"><a href=" + pullRequest.pullRequestLink + " target=_parent>" + pullRequest.id + "</a></td>");
-		
+
 		var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
 		$("#" + pullRequest.id + "").append(creatorElem);
-		
+
 		$("#" + pullRequest.id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
 		$("#" + pullRequest.id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(pullRequest.repository.name));
-		
+		repositories.push(pullRequest.repository.name);
 		$("#" + pullRequest.id + "").append("<td>" + pullRequest.cDate + "</td>");
-	
+
 		var mergeElem = $("<td>" + pullRequest.resultMerge + "</td>").css("color", pullRequest.resultMerge === "Succeeded" ? "green" : "red");
 		$("#" + pullRequest.id + "").append(mergeElem);
 
@@ -112,20 +134,34 @@ function generatePullRequestTable(pullRequestArray){
 				infoBubble = reviewer.displayName + " rejected the pull request.";
 			}
 			if (pullRequest.userId === reviewer.id) $("#" + pullRequest.id + "").removeClass("notUserReviewer");
+
 			holder.append($("<img data-toggle=\"tooltip\" title=\"" + infoBubble + "\" class=\"img-responsive" + vote + "\" width=\"27px\" height=\"27px\" src=\"" + reviewer.imageUrl + "\" alt=\"" + reviewer.displayName + "\"></img>"));
 		});
 		$("#" + pullRequest.id + "").append(holder);
-		
-		
+
+
 		$("#" + pullRequest.id + "").addClass(pullRequest.resultMerge2);
-		
+
 		$("#" + pullRequest.id + "").data("linkToPr", pullRequest.pullRequestLink);
-		
+
 		$('[data-toggle="tooltip"]').tooltip();
 	});
-};	
+
+	repositories = Array.from(new Set(repositories));
+	var selectedRepositories = localStorage.getItem('selectedRepositories');
+	$.each(repositories, function(i, text) {
+		var selectedString = "";
+		if (selectedRepositories === null || selectedRepositories.includes(text)) {
+			selectedString = "selected='selected'";
+		}
+		$("#repositories-select").append("<option value='" + text + "' " + selectedString + ">" + text + "</option>");
+	});
+
+	updateByRepository();
+};
 
 $(document).ready(function () {
+
 	$('#limitReviewerMe').change(function () {
 		$('.notUserReviewer').toggle(!(this.checked));
 		if ($('#limitCreatorMe').is(':checked')) $('.notUserCreator').toggle(false);
@@ -157,5 +193,13 @@ $(document).ready(function () {
 			unsucceessful.removeClass("danger");
 			unsucceessful.addClass("unsuccessful");
 		}
+	});
+
+	$("#repositories-select").multiselect({
+		includeSelectAllOption: true,
+		nonSelectedText: 'Select repositories',
+		onDeselectAll: updateByRepository,
+		onSelectAll: updateByRepository,
+		onChange: updateByRepository,
 	});
 });

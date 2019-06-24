@@ -5,11 +5,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <!-- bootstrap-multiselect theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
     <!-- Custom Styles for this Extension-->
 	<link rel="stylesheet" type="text/css" href="styles/blitzallpulls.css">
 	<!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="sdk/scripts/VSS.SDK.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
     <!-- AppInsights -->
     <!--script src="scripts/appinsightsblitz.js"></script-->
 </head>
@@ -19,21 +22,27 @@
         <h5 class="col-md-2" align="center">Pull Request Count: <span id="PullRequestCountSpan"></span></h5><h3 class="col-md-6" align="center">Active Pull Requests</h3><h5 class="col-md-3" align="center">Project: <span id="ProjectNameSpan"></span></h5>
     </div>
     <div class="row" id="filters" style="display:none;">
-        <form role="form">
-            <div class="checkbox">
-                <label><input type="checkbox" value="" id="limitReviewerMe"> Only Pull Requests I am a Reviewer.</label>
+        <div class="col-md-3">
+            <form role="form">
+                <div class="checkbox">
+                    <label><input type="checkbox" value="" id="limitReviewerMe"> Only Pull Requests I am a Reviewer.</label>
+                </div>
+                <div class="checkbox">
+                    <label><input type="checkbox" value="" id="limitCreatorMe"> Only Pull Requests I am the Creator.</label>
+                </div>
+            </form>
+            <div class="form-group fitFilters">
+            <label for="sel1">Theme:</label>
+            <select class="form-control" id="selTheme">
+                <option>Classic</option>
+                <option>Small Fade</option>
+            </select>
             </div>
-            <div class="checkbox">
-                <label><input type="checkbox" value="" id="limitCreatorMe"> Only Pull Requests I am the Creator.</label>
-            </div>
-        </form>
-		<div class="form-group fitFilters">
-		  <label for="sel1">Theme:</label>
-		  <select class="form-control" id="selTheme">
-			<option>Classic</option>
-			<option>Small Fade</option>
-		  </select>
-		</div>
+        </div>
+        <div class="col-md-9">
+            <p><b>Repositories </b></p>
+            <select id="repositories-select" multiple="multiple"></select>
+        </div>
     </div>
     <div class="table-responsive" id="pullRequestTableContainer">
         <table class="table table-hover table-striped table-condensed" id="pullRequestTable">
