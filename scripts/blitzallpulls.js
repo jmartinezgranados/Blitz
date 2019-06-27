@@ -51,7 +51,8 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 
 		// get all repositories and add them to global repositories array.
 		gitClient.getRepositories(projCurr).then(function (fetchedRepos) {
-			repositories = fetchedRepos
+			// Sort the repositories alphabetically and then store them
+			repositories = fetchedRepos.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
 		}).catch(console.log.bind(console));
 
 		// Get Pull Reuqets Data and populate pull request array.
