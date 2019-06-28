@@ -49,6 +49,12 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 		// Display Project Name
 		$("#ProjectNameSpan").text(projCurr);
 
+		// get all repositories and add them to global repositories array.
+		gitClient.getRepositories(projCurr).then(function (fetchedRepos) {
+			// Sort the repositories alphabetically and then store them
+			repositories = fetchedRepos.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+		}).catch(console.log.bind(console));
+
 		// Get Pull Reuqets Data and populate pull request array.
 		gitClient.getPullRequestsByProject(projCurr).then(function (pullRequests) {
 			// Populate Pull Request Count
@@ -106,7 +112,6 @@ function generatePullRequestTable(pullRequestArray){
 
 		$("#" + pullRequest.id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
 		$("#" + pullRequest.id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(pullRequest.repository.name));
-		repositories.push(pullRequest.repository.name);
 		$("#" + pullRequest.id + "").append("<td>" + pullRequest.cDate + "</td>");
 
 		var mergeElem = $("<td>" + pullRequest.resultMerge + "</td>").css("color", pullRequest.resultMerge === "Succeeded" ? "green" : "red");
@@ -147,14 +152,22 @@ function generatePullRequestTable(pullRequestArray){
 		$('[data-toggle="tooltip"]').tooltip();
 	});
 
-	repositories = Array.from(new Set(repositories));
 	var selectedRepositories = localStorage.getItem('selectedRepositories');
-	$.each(repositories, function(i, text) {
+	$.each(repositories, function(i, repository) {
 		var selectedString = "";
-		if (selectedRepositories === null || selectedRepositories.includes(text)) {
+		var repositoryName = repository.name;
+		if (selectedRepositories === null || selectedRepositories.includes(repositoryName)) {
 			selectedString = "selected='selected'";
 		}
-		$("#repositories-select").append("<option value='" + text + "' " + selectedString + ">" + text + "</option>");
+		$("#repositories-select").append("<option value='" + repositoryName + "' " + selectedString + ">" + repositoryName + "</option>");
+	});
+
+	$("#repositories-select").multiselect({
+		includeSelectAllOption: true,
+		nonSelectedText: 'Select repositories',
+		onDeselectAll: updateByRepository,
+		onSelectAll: updateByRepository,
+		onChange: updateByRepository,
 	});
 
 	updateByRepository();
@@ -193,13 +206,5 @@ $(document).ready(function () {
 			unsucceessful.removeClass("danger");
 			unsucceessful.addClass("unsuccessful");
 		}
-	});
-
-	$("#repositories-select").multiselect({
-		includeSelectAllOption: true,
-		nonSelectedText: 'Select repositories',
-		onDeselectAll: updateByRepository,
-		onSelectAll: updateByRepository,
-		onChange: updateByRepository,
 	});
 });
