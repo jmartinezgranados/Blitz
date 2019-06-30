@@ -1,6 +1,5 @@
 // The viewmodel
 var pullRequestArray = [];
-var repositories = [];
 
 var updateByRepository = function(option, checked) {
 	var reposToShow = $("#repositories-select").val();
@@ -12,15 +11,14 @@ var updateByRepository = function(option, checked) {
 			  $(el).closest("tr").removeClass("hidden");
 			}
 		});
-		$("#PullRequestCountSpan").html($("#pullRequestTableBody tr").not(".hidden").length);
 	}
 	else {
 		$('#pullRequestTableBody td:nth-child(3)').each(function(i, el) {
 			$(el).closest("tr").addClass("hidden");
 		});
-		$("#PullRequestCountSpan").html(0);
 	}
-	localStorage.setItem('selectedRepositories', reposToShow);
+	$("#PullRequestCountSpan").html($("#pullRequestTableBody tr").not(".hidden").length);
+	setSelectedRepositories(reposToShow);
 };
 
 // Sets up the initial handshake with the host frame
@@ -49,16 +47,16 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 		// Display Project Name
 		$("#ProjectNameSpan").text(projCurr);
 
-		// get all repositories and add them to global repositories array.
+		// Get all repositories and add them to the multiselect
+		var repositories = [];
 		gitClient.getRepositories(projCurr).then(function (fetchedRepos) {
-			// Sort the repositories alphabetically and then store them
-			repositories = fetchedRepos.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-		}).catch(console.log.bind(console));
+			repositories = fetchedRepos;
+			// Sort the repositories alphabetically
+			repositories.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+		}).finally(function() {initializeMultiselect(repositories);}).catch(console.log.bind(console));
 
 		// Get Pull Reuqets Data and populate pull request array.
 		gitClient.getPullRequestsByProject(projCurr).then(function (pullRequests) {
-			// Populate Pull Request Count
-			$("#PullRequestCountSpan").html(pullRequests.length);
 			jQuery.each(pullRequests, function (index, pullRequest) {
 				var idData = pullRequest.pullRequestId;
 				var createdByData = pullRequest.createdBy;
@@ -89,88 +87,112 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				});
 				pullRequestData.reviewers = reviewerArray;
 
-
 				// Push pullRequest to array.
 				pullRequestArray.push(pullRequestData);
 			});
 		}).finally(function() {generatePullRequestTable(pullRequestArray);}).catch(console.log.bind(console));
 
-
 		VSS.notifyLoadSucceeded();
 	});
 
-function generatePullRequestTable(pullRequestArray){
-	jQuery.each(pullRequestArray, function (index, pullRequest) {
-		$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator\" id=\"" + pullRequest.id + "\"></tr>");
+function setSelectedRepositories(arrayOfRepositories)
+{
+	 // Get data service
+	 VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService) {
+        // Set value in user scope
+        dataService.setValue("selectedRepositories", arrayOfRepositories, {scopeType: "User"});
+    });
+}
 
-		if (pullRequest.userId === pullRequest.createdBy.id) $("#" + pullRequest.id + "").removeClass("notUserCreator");
+function initializeMultiselect(repositories){
+	// Get data service
+    VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService) {
+        dataService.getValue("selectedRepositories", {scopeType: "User"}).then(function(selectedRepositories) {
+			// Append the multiselect
+			$.each(repositories, function(i, repository) {
+				var selectedString = "";
+				var repositoryName = repository.name;
 
-		$("#" + pullRequest.id + "").append("<td style=\"color:black !important;\"><a href=" + pullRequest.pullRequestLink + " target=_parent>" + pullRequest.id + "</a></td>");
+				// Pre-select the options
+				if (!selectedRepositories || selectedRepositories.includes(repositoryName)) {
+					selectedString = "selected='selected'";
+				}
+				$("#repositories-select").append("<option value='" + repositoryName + "' " + selectedString + ">" + repositoryName + "</option>");
+			});
 
-		var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
-		$("#" + pullRequest.id + "").append(creatorElem);
-
-		$("#" + pullRequest.id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
-		$("#" + pullRequest.id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(pullRequest.repository.name));
-		$("#" + pullRequest.id + "").append("<td>" + pullRequest.cDate + "</td>");
-
-		var mergeElem = $("<td>" + pullRequest.resultMerge + "</td>").css("color", pullRequest.resultMerge === "Succeeded" ? "green" : "red");
-		$("#" + pullRequest.id + "").append(mergeElem);
-
-		var holder = $("<td></td>");
-		// Add Reviewers
-		jQuery.each(pullRequest.reviewers, function (index, reviewer) {
-			var vote = "";
-			var infoBubble = "No response.";
-			if (reviewer.vote === -5) {
-				vote = " waitingauthor";
-				infoBubble = reviewer.displayName + " recommends waiting for the author of the code.";
-			}
-			if (reviewer.vote === 5) {
-				vote = " approvedwithsuggestions";
-				infoBubble = reviewer.displayName + " approved the pull request with suggestions.";
-			}
-			if (reviewer.vote === 10) {
-				vote = " approved";
-				infoBubble = reviewer.displayName + " approved the pull request.";
-			}
-			if (reviewer.vote === -10) {
-				vote = " rejected";
-				infoBubble = reviewer.displayName + " rejected the pull request.";
-			}
-			if (pullRequest.userId === reviewer.id) $("#" + pullRequest.id + "").removeClass("notUserReviewer");
-
-			holder.append($("<img data-toggle=\"tooltip\" title=\"" + infoBubble + "\" class=\"img-responsive" + vote + "\" width=\"27px\" height=\"27px\" src=\"" + reviewer.imageUrl + "\" alt=\"" + reviewer.displayName + "\"></img>"));
+			// Initialize multiselect
+			$("#repositories-select").multiselect({
+				includeSelectAllOption: true,
+				nonSelectedText: 'Select repositories',
+				onDeselectAll: updateByRepository,
+				onSelectAll: updateByRepository,
+				onChange: updateByRepository,
+			});
 		});
-		$("#" + pullRequest.id + "").append(holder);
-
-
-		$("#" + pullRequest.id + "").addClass(pullRequest.resultMerge2);
-
-		$("#" + pullRequest.id + "").data("linkToPr", pullRequest.pullRequestLink);
-
-		$('[data-toggle="tooltip"]').tooltip();
 	});
+}
 
-	var selectedRepositories = localStorage.getItem('selectedRepositories');
-	$.each(repositories, function(i, repository) {
-		var selectedString = "";
-		var repositoryName = repository.name;
-		if (selectedRepositories === null || selectedRepositories.includes(repositoryName)) {
-			selectedString = "selected='selected'";
-		}
-		$("#repositories-select").append("<option value='" + repositoryName + "' " + selectedString + ">" + repositoryName + "</option>");
+function generatePullRequestTable(pullRequestArray){
+	VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService) {
+        dataService.getValue("selectedRepositories", {scopeType: "User"}).then(function(selectedRepositories) {
+			jQuery.each(pullRequestArray, function (index, pullRequest) {
+
+				var hiddenClass = (selectedRepositories && !selectedRepositories.includes(pullRequest.repository.name)) ? "hidden" : "";
+				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator "+hiddenClass+" \" id=\"" + pullRequest.id + "\"></tr>");
+
+				if (pullRequest.userId === pullRequest.createdBy.id) $("#" + pullRequest.id + "").removeClass("notUserCreator");
+
+				$("#" + pullRequest.id + "").append("<td style=\"color:black !important;\"><a href=" + pullRequest.pullRequestLink + " target=_parent>" + pullRequest.id + "</a></td>");
+
+				var creatorElem = $("<td></td>").append($("<img class=\"img-responsive\" width=\"27px\" height=\"27px\" src=\"" + pullRequest.createdBy.imageUrl + "\" title=\"" + pullRequest.createdBy.displayName + "\" alt=\"" + pullRequest.createdBy.displayName + "\"></img>"));
+				$("#" + pullRequest.id + "").append(creatorElem);
+
+				$("#" + pullRequest.id + "").append($("<td data-repid=\"" + pullRequest.repository.id + "\"></td>").text(pullRequest.title));
+				$("#" + pullRequest.id + "").find("[data-repid='" + pullRequest.repository.id + "']").before($("<td></td>").text(pullRequest.repository.name));
+				$("#" + pullRequest.id + "").append("<td>" + pullRequest.cDate + "</td>");
+
+				var mergeElem = $("<td>" + pullRequest.resultMerge + "</td>").css("color", pullRequest.resultMerge === "Succeeded" ? "green" : "red");
+				$("#" + pullRequest.id + "").append(mergeElem);
+
+				var holder = $("<td></td>");
+				// Add Reviewers
+				jQuery.each(pullRequest.reviewers, function (index, reviewer) {
+					var vote = "";
+					var infoBubble = "No response.";
+					if (reviewer.vote === -5) {
+						vote = " waitingauthor";
+						infoBubble = reviewer.displayName + " recommends waiting for the author of the code.";
+					}
+					if (reviewer.vote === 5) {
+						vote = " approvedwithsuggestions";
+						infoBubble = reviewer.displayName + " approved the pull request with suggestions.";
+					}
+					if (reviewer.vote === 10) {
+						vote = " approved";
+						infoBubble = reviewer.displayName + " approved the pull request.";
+					}
+					if (reviewer.vote === -10) {
+						vote = " rejected";
+						infoBubble = reviewer.displayName + " rejected the pull request.";
+					}
+					if (pullRequest.userId === reviewer.id) $("#" + pullRequest.id + "").removeClass("notUserReviewer");
+
+					holder.append($("<img data-toggle=\"tooltip\" title=\"" + infoBubble + "\" class=\"img-responsive" + vote + "\" width=\"27px\" height=\"27px\" src=\"" + reviewer.imageUrl + "\" alt=\"" + reviewer.displayName + "\"></img>"));
+				});
+				$("#" + pullRequest.id + "").append(holder);
+
+
+				$("#" + pullRequest.id + "").addClass(pullRequest.resultMerge2);
+
+				$("#" + pullRequest.id + "").data("linkToPr", pullRequest.pullRequestLink);
+
+				$('[data-toggle="tooltip"]').tooltip();
+			});
+
+			// Set count
+			$("#PullRequestCountSpan").html($("#pullRequestTableBody tr").not(".hidden").length);
+		});
 	});
-
-	$("#repositories-select").multiselect({
-		includeSelectAllOption: true,
-		nonSelectedText: 'Select repositories',
-		onDeselectAll: updateByRepository,
-		onSelectAll: updateByRepository,
-		onChange: updateByRepository,
-	});
-
-	updateByRepository();
 };
 
 $(document).ready(function () {
