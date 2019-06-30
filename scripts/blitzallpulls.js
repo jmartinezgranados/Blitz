@@ -1,19 +1,18 @@
 // The viewmodel
 var pullRequestArray = [];
 
-var updateByRepository = function(option, checked) {
+var updateByRepository = function (option, checked) {
 	var reposToShow = $("#repositories-select").val();
-	if(reposToShow && reposToShow.length > 0) {
-		$('#pullRequestTableBody td:nth-child(3)').each(function(i, el) {
-			if(!reposToShow.includes($(el).text())) {
-			  $(el).closest("tr").addClass("hidden");
+	if (reposToShow && reposToShow.length > 0) {
+		$('#pullRequestTableBody td:nth-child(3)').each(function (i, el) {
+			if (!reposToShow.includes($(el).text())) {
+				$(el).closest("tr").addClass("hidden");
 			} else {
-			  $(el).closest("tr").removeClass("hidden");
+				$(el).closest("tr").removeClass("hidden");
 			}
 		});
-	}
-	else {
-		$('#pullRequestTableBody td:nth-child(3)').each(function(i, el) {
+	} else {
+		$('#pullRequestTableBody td:nth-child(3)').each(function (i, el) {
 			$(el).closest("tr").addClass("hidden");
 		});
 	}
@@ -33,7 +32,8 @@ VSS.init({
 
 // Load VSTS context and data.
 VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
-	"VSS/Service", "TFS/VersionControl/GitRestClient", "TFS/Build/RestClient"],
+		"VSS/Service", "TFS/VersionControl/GitRestClient", "TFS/Build/RestClient"
+	],
 	function (Controls, Grids, Dialogs, VSS_Service, Git_Client, Build_Client) {
 		// The Git and Buile clients for eventually populating code and build details.
 		var gitClient = VSS_Service.getCollectionClient(Git_Client.GitHttpClient);
@@ -52,15 +52,17 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 		gitClient.getRepositories(projCurr).then(function (fetchedRepos) {
 			repositories = fetchedRepos;
 			// Sort the repositories alphabetically
-			repositories.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
-		}).finally(function() {initializeMultiselect(repositories);}).catch(console.log.bind(console));
+			repositories.sort((a, b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0));
+		}).finally(function () {
+			initializeMultiselect(repositories);
+		}).catch(console.log.bind(console));
 
 		// Get Pull Reuqets Data and populate pull request array.
 		gitClient.getPullRequestsByProject(projCurr).then(function (pullRequests) {
 			jQuery.each(pullRequests, function (index, pullRequest) {
 				var idData = pullRequest.pullRequestId;
 				var createdByData = pullRequest.createdBy;
-				var pullRequestLinkData = currentContext.host.uri + encodeURIComponent(projCurr) + "\/_git" + "\/" + pullRequest.repository.id +"\/pullRequest\/"+pullRequest.pullRequestId;
+				var pullRequestLinkData = currentContext.host.uri + encodeURIComponent(projCurr) + "\/_git" + "\/" + pullRequest.repository.id + "\/pullRequest\/" + pullRequest.pullRequestId;
 				var cDateData = pullRequest.creationDate.toString();
 				var titleData = pullRequest.title;
 				var resultMergeData = pullRequest.mergeStatus === 3 ? "Succeeded" : "Conflicts";
@@ -90,26 +92,31 @@ VSS.require(["VSS/Controls", "VSS/Controls/Grids", "VSS/Controls/Dialogs",
 				// Push pullRequest to array.
 				pullRequestArray.push(pullRequestData);
 			});
-		}).finally(function() {generatePullRequestTable(pullRequestArray);}).catch(console.log.bind(console));
+		}).finally(function () {
+			generatePullRequestTable(pullRequestArray);
+		}).catch(console.log.bind(console));
 
 		VSS.notifyLoadSucceeded();
 	});
 
-function setSelectedRepositories(arrayOfRepositories)
-{
-	 // Get data service
-	 VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService) {
-        // Set value in user scope
-        dataService.setValue("selectedRepositories", arrayOfRepositories, {scopeType: "User"});
-    });
+function setSelectedRepositories(arrayOfRepositories) {
+	// Get data service
+	VSS.getService(VSS.ServiceIds.ExtensionData).then(function (dataService) {
+		// Set value in user scope
+		dataService.setValue("selectedRepositories", arrayOfRepositories, {
+			scopeType: "User"
+		});
+	});
 }
 
-function initializeMultiselect(repositories){
+function initializeMultiselect(repositories) {
 	// Get data service
-    VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService) {
-        dataService.getValue("selectedRepositories", {scopeType: "User"}).then(function(selectedRepositories) {
+	VSS.getService(VSS.ServiceIds.ExtensionData).then(function (dataService) {
+		dataService.getValue("selectedRepositories", {
+			scopeType: "User"
+		}).then(function (selectedRepositories) {
 			// Append the multiselect
-			$.each(repositories, function(i, repository) {
+			$.each(repositories, function (i, repository) {
 				var selectedString = "";
 				var repositoryName = repository.name;
 
@@ -132,13 +139,15 @@ function initializeMultiselect(repositories){
 	});
 }
 
-function generatePullRequestTable(pullRequestArray){
-	VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService) {
-        dataService.getValue("selectedRepositories", {scopeType: "User"}).then(function(selectedRepositories) {
+function generatePullRequestTable(pullRequestArray) {
+	VSS.getService(VSS.ServiceIds.ExtensionData).then(function (dataService) {
+		dataService.getValue("selectedRepositories", {
+			scopeType: "User"
+		}).then(function (selectedRepositories) {
 			jQuery.each(pullRequestArray, function (index, pullRequest) {
 
 				var hiddenClass = (selectedRepositories && !selectedRepositories.includes(pullRequest.repository.name)) ? "hidden" : "";
-				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator "+hiddenClass+" \" id=\"" + pullRequest.id + "\"></tr>");
+				$("#pullRequestTableBody").append("<tr class=\"notUserReviewer notUserCreator " + hiddenClass + " \" id=\"" + pullRequest.id + "\"></tr>");
 
 				if (pullRequest.userId === pullRequest.createdBy.id) $("#" + pullRequest.id + "").removeClass("notUserCreator");
 
@@ -196,7 +205,6 @@ function generatePullRequestTable(pullRequestArray){
 };
 
 $(document).ready(function () {
-
 	$('#limitReviewerMe').change(function () {
 		$('.notUserReviewer').toggle(!(this.checked));
 		if ($('#limitCreatorMe').is(':checked')) $('.notUserCreator').toggle(false);
@@ -205,13 +213,13 @@ $(document).ready(function () {
 		$('.notUserCreator').toggle(!(this.checked));
 		if ($('#limitReviewerMe').is(':checked')) $('.notUserReviewer').toggle(false);
 	});
-	$(document).on("click","#pullRequestTableBody tr", function() {
-		window.open($(this).data("linkToPr"),"_parent");
+	$(document).on("click", "#pullRequestTableBody tr", function () {
+		window.open($(this).data("linkToPr"), "_parent");
 	});
-	$("#toggleOptions").click(function(){
+	$("#toggleOptions").click(function () {
 		$("#filters").toggle();
 	});
-	$("#selTheme").change(function() {
+	$("#selTheme").change(function () {
 		var selectedValue = $("#selTheme").val();
 		if (selectedValue === "Classic") {
 			var succeeded = $("tr.successful");
