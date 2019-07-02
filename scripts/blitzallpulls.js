@@ -129,6 +129,7 @@ function initializeMultiselect(repositories) {
 
 			// Initialize multiselect
 			$("#repositories-select").multiselect({
+				maxHeight: 200,
 				includeSelectAllOption: true,
 				nonSelectedText: 'Select repositories',
 				onDeselectAll: updateByRepository,
