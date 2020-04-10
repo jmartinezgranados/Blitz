@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "id": "blitz-allpulls-extension",
-  "version": "1.0.43",
+  "version": "1.0.46",
   "name": "Blitz Active Pull Requests",
   "description": "Shows all active pull requests across all of your project's repositories.",
   "publisher": "sierpinski",
@@ -40,6 +40,12 @@
   "links": {
     "home": {
       "uri": "https://github.com/sierpinski/Blitz"
+    },
+    "support": {
+      "url": "https://github.com/sierpinski/Blitz"
+    },
+    "privacypolicy": {
+      "url": "https://creativecommons.org/privacy/"
     }
   },
   "branding": {
@@ -62,7 +68,8 @@
       "properties": {
         "name": "Active Pull Requests",
         "order": 99,
-        "uri": "blitzallpulls.html"
+        "uri": "blitzallpulls.html",
+        "icon": "images/bapmenuicon.png"
       }
     },
     {
@@ -117,6 +124,10 @@
     },
     {
       "path": "images/preview.png",
+      "addressable": true
+    },
+    {
+      "path": "images/bapmenuicon.png",
       "addressable": true
     }
   ]
